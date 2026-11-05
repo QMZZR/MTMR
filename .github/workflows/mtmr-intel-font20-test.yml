@@ -1,0 +1,55 @@
+name: MTMR Intel Lyrics Font 20 Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-intel:
+    runs-on: macos-15-intel
+    timeout-minutes: 30
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v4
+
+      - name: Use Xcode 16.2
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Build unsigned Intel app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project MTMR.xcodeproj \
+            -scheme MTMR \
+            -configuration Release \
+            -sdk macosx \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/mtmr-derived" \
+            ARCHS=x86_64 \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            build
+
+      - name: Pack test app
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/mtmr-derived/Build/Products/Release/MTMR.app"
+          test -d "$APP"
+          lipo -info "$APP/Contents/MacOS/MTMR"
+          ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/MTMR-Intel-Font20-Test.zip"
+
+      - name: Upload test app
+        uses: actions/upload-artifact@v4
+        with:
+          name: MTMR-Intel-Font20-Test
+          path: ${{ runner.temp }}/MTMR-Intel-Font20-Test.zip
+          if-no-files-found: error
+          retention-days: 7
