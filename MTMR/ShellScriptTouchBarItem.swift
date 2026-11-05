@@ -9,6 +9,7 @@ import Foundation
 
 class ShellScriptTouchBarItem: CustomButtonTouchBarItem {
     private let interval: TimeInterval
+    private let isLyricsSource: Bool
     private let source: String
     private var forceHideConstraint: NSLayoutConstraint!
     
@@ -18,6 +19,7 @@ class ShellScriptTouchBarItem: CustomButtonTouchBarItem {
     }
 
     init?(identifier: NSTouchBarItem.Identifier, source: SourceProtocol, interval: TimeInterval) {
+        self.isLyricsSource = (source as? Source)?.filePath?.contains("applemusic-lyrics") ?? false
         self.interval = interval
         self.source = source.string ?? "echo No \"source\""
         super.init(identifier: identifier, title: "⏳")
@@ -55,6 +57,13 @@ class ShellScriptTouchBarItem: CustomButtonTouchBarItem {
         helper.defaultStringColor = NSColor.white
         helper.font = "1".defaultTouchbarAttributedString.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
         let title = NSMutableAttributedString.init(attributedString: helper.attributedString(withANSIEscapedString: rawTitle) ?? NSAttributedString(string: ""))
+       if isLyricsSource && title.length > 0 {
+    title.addAttribute(
+        .font,
+        value: NSFont.systemFont(ofSize: 18, weight: .regular),
+        range: NSRange(location: 0, length: title.length)
+    )
+}
         title.addAttributes([.baselineOffset: 1], range: NSRange(location: 0, length: title.length))
         let newBackgoundColor: NSColor? = title.length != 0 ? title.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor : nil
         
