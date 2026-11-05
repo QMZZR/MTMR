@@ -737,8 +737,24 @@ struct Source: Decodable, SourceProtocol {
     }
 
     var image: NSImage? {
-        return data?.image
+    guard let imageData = data,
+          let original = NSImage(data: imageData) else {
+        return nil
     }
+
+    let path = (filePath ?? "").lowercased()
+    let enlarge = [
+        "/codex.png",
+        "/chrome.png",
+        "/wechat.png",
+        "/music.png"
+    ].contains { path.hasSuffix($0) }
+
+    let size: CGFloat = enlarge ? 28 : 24
+    return original.resize(
+        maxSize: NSSize(width: size, height: size)
+    )
+}
 
     var appleScript: NSAppleScript? {
         return filePath?.fileURL.appleScript ?? string?.appleScript
