@@ -1,11 +1,7 @@
 name: Publish unsign version
 
 on:
-  push:
-    branches:
-      - master
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 jobs:
   Build-and-release:
