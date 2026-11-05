@@ -750,7 +750,14 @@ struct Source: Decodable, SourceProtocol {
         "/music.png"
     ].contains { path.hasSuffix($0) }
 
-    let size: CGFloat = enlarge ? 28 : 24
+    let size: CGFloat
+if path.hasSuffix("/codex.png") {
+    size = 28
+} else if ["/chrome.png", "/wechat.png", "/music.png"].contains(where: { path.hasSuffix($0) }) {
+    size = 30
+} else {
+    size = 24
+}
     return original.resize(
         maxSize: NSSize(width: size, height: size)
     )
